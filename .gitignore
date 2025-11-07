@@ -1,0 +1,114 @@
+# Python byte-compiled / optimized
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environments
+.env
+.env.*
+env/
+venv/
+ENV/
+.venv/
+venv.bak/
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+eggs/
+*.egg-info/
+.installed.cfg
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+nosetests.xml
+coverage.xml
+*.cover
+
+# Mypy / type checkers
+.mypy_cache/
+.pyright/
+.pyre/
+
+# Jupyter
+.ipynb_checkpoints
+
+# Django / Flask common
+local_settings.py
+db.sqlite3
+media/
+staticfiles/
+instance/
+.webassets-cache
+
+# SQL dumps / DB files (you said you use MySQL; ignore local dumps)
+*.sql
+*.sql.gz
+*.sqlite3
+*.db
+
+# Logs
+*.log
+logs/
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*~
+*.swp
+*.swo
+
+# IDEs
+.vscode/
+.idea/
+*.iml
+*.sublime-project
+*.sublime-workspace
+.ropeproject/
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Secrets, keys and credentials
+*.pem
+*.key
+id_rsa
+id_rsa.pub
+credentials.json
+secrets.json
+.secret
+
+# Documentation
+docs/_build/
+
+# PyBuilder
+target/
