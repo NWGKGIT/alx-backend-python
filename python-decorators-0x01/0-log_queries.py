@@ -1,21 +1,16 @@
 import sqlite3
 import functools
-
+from datetime import datetime  # required for logging time
 
 def log_queries(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        query = ""
-        if args:
-            query = args[0]  
-        elif 'query' in kwargs:
-            query = kwargs['query'] 
-
+        query = kwargs.get("query") or (args[0] if args else None)
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         if query:
-            print(f"LOG: Executing query: {query}")
+            print(f"[{timestamp}] Executing SQL Query: {query}")
         else:
-            print("LOG: Could not find query to log.")
-        
+            print(f"[{timestamp}] No SQL query found.")
         return func(*args, **kwargs)
     return wrapper
 
@@ -29,5 +24,6 @@ def fetch_all_users(query):
     conn.close()
     return results
 
+
 users = fetch_all_users(query="SELECT * FROM users")
-print(f"Found users: {users}")
+print(users)
