@@ -1,6 +1,7 @@
 import sqlite3
 import functools
 
+
 def log_queries(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
@@ -18,11 +19,9 @@ def log_queries(func):
         return func(*args, **kwargs)
     return wrapper
 
+
 @log_queries
 def fetch_all_users(query):
-    """
-    Fetches all users from the database.
-    """
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
     cursor.execute(query)
