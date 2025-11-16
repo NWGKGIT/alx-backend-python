@@ -27,12 +27,8 @@ class TestAccessNestedMap(unittest.TestCase):
     ])
     def test_access_nested_map_exception(self, nested_map, path):
         """Test access_nested_map raises KeyError for invalid paths."""
-        # Use assertRaises as a context manager to catch the error
         with self.assertRaises(KeyError) as context:
             access_nested_map(nested_map, path)
-        
-        # Check that the exception message is the key that failed
-        # The exception's string representation is the key itself, with quotes
         self.assertEqual(str(context.exception), f"'{path[-1]}'")
 
 
@@ -46,19 +42,13 @@ class TestGetJson(unittest.TestCase):
     @patch('requests.get')
     def test_get_json(self, test_url, test_payload, mock_get):
         """Test get_json returns expected payload and calls requests.get once."""
-        # Create a mock response object that requests.get will return
         mock_response = Mock()
-        # Set the mock's json() method to return the test_payload
         mock_response.json.return_value = test_payload
         mock_get.return_value = mock_response
 
-        # Call the function
         result = get_json(test_url)
 
-        # Assert the result is what we expect
         self.assertEqual(result, test_payload)
-
-        # Assert that requests.get was called exactly once with the test_url
         mock_get.assert_called_once_with(test_url)
 
 
@@ -80,21 +70,16 @@ class TestMemoize(unittest.TestCase):
                 """A property that calls a_method, memoized."""
                 return self.a_method()
 
-        # Create an instance and patch its 'a_method'
         test_instance = TestClass()
+        # This 'with' statement was line 48 and was too long. I've broken it.
         with patch.object(
             test_instance, 'a_method', return_value=42
         ) as mock_a_method:
-            
-            # Access the property twice
             result1 = test_instance.a_property
             result2 = test_instance.a_property
 
-            # Assert results are correct
             self.assertEqual(result1, 42)
             self.assertEqual(result2, 42)
-
-            # Assert the underlying 'a_method' was called only ONCE
             mock_a_method.assert_called_once()
 
 
