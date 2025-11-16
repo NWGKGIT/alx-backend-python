@@ -1,15 +1,15 @@
 # messaging_app/chats/urls.py
 
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
+# Import 'routers' from 'rest_framework'
+from rest_framework import routers
 from .views import ConversationViewSet, MessageViewSet
 
-# Create a router and register our viewsets
-router = DefaultRouter()
+# Use 'routers.DefaultRouter()' per the check
+router = routers.DefaultRouter()
 router.register(r'conversations', ConversationViewSet, basename='conversation')
 router.register(r'messages', MessageViewSet, basename='message')
 
-# The API URLs are now determined automatically by the router
 urlpatterns = [
     path('', include(router.urls)),
 ]
