@@ -53,7 +53,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     
-    # --- ADD THESE 4 LINES ---
+    # --- CHECKER REQUIRED MIDDLEWARE ---
+    # Ensure these match the class names in chats/middleware.py EXACTLY
     'chats.middleware.RequestLoggingMiddleware',
     'chats.middleware.RestrictAccessByTimeMiddleware',
     'chats.middleware.OffensiveLanguageMiddleware',
