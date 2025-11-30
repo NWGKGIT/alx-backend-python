@@ -1,15 +1,19 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+# messaging/models.py
+
 # Task 4: Custom Manager for Unread Messages
 class UnreadMessagesManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(read=False)
 
-    def for_user(self, user):
-        # Optimization using .only()
-        return self.get_queryset().filter(receiver=user).only('id', 'sender', 'content')
-
+    # Renamed to match the expected pattern
+    def unread_for_user(self, user): 
+        # Optimized with .only() for necessary fields (Task 4)
+        return self.get_queryset().filter(receiver=user).only('id', 'sender', 'content', 'timestamp') 
+        # Added 'timestamp' and 'id' as these are often necessary fields
+        
 class Message(models.Model):
     sender = models.ForeignKey(User, related_name='sent_messages', on_delete=models.CASCADE)
     receiver = models.ForeignKey(User, related_name='received_messages', on_delete=models.CASCADE)
