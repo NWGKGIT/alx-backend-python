@@ -19,6 +19,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ("user_id", "date_joined", "role")
 
+
 class MessageSerializer(serializers.ModelSerializer):
     sender = CustomUserSerializer(read_only=True)
 
@@ -71,4 +72,21 @@ class ConversationSerializer(serializers.ModelSerializer):
     def validate_participant_ids(self, value):
         if len(value) < 2:
             raise ValidationError("A conversation must have at least two participants.")
+        if len(value) != len(set(value)):
+            raise ValidationError("Participants cannot be duplicated in a conversation.")        
         return value
+
+    def validate(self, data):
+        request = self.context.get("request")
+
+        if request and request.user.is_authenticated:
+            creator = request.user
+            participants = data.get("participants", [])
+
+            if creator not in participants:
+                raise ValidationError(
+                    {
+                        "participant_ids": "The user initiating the conversation must be included in the participants list."
+                    }
+                )
+        return data
