@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: messaging-app-green
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: messaging-app
+      version: green
+  template:
+    metadata:
+      labels:
+        app: messaging-app
+        version: green
+    spec:
+      containers:
+      - name: messaging-app
+        # In a real scenario, this would be image:v2.0
+        # We use the same image here for demonstration unless you built a new one
+        image: messaging-app:latest 
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8000

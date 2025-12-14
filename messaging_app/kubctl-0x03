@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Apply the updated configuration
+echo "Applying rolling update..."
+kubectl apply -f blue_deployment.yaml
+
+# Monitor rollout status
+kubectl rollout status deployment/messaging-app-blue
+
+# Test for downtime
+echo "Testing connectivity during update..."
+# This assumes the service is accessible via localhost:8080 (port-forward)
+# Or you can check the internal ClusterIP if running inside the cluster.
+# Here is a basic loop check:
+for i in {1..20}; do
+  curl -I -s -o /dev/null -w "%{http_code}\n" http://localhost:8080 || echo "Connection Failed"
+  sleep 1
+done
+
+# Verify completion
+kubectl get pods -l app=messaging-app,version=blue

@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# 1. Scale the deployment to 3 replicas
+kubectl scale deployment messaging-app-deployment --replicas=3
+
+# 2. Verify replicas are coming up
+sleep 5
+kubectl get pods
+
+# 3. Monitor Resource Usage (Requires metrics-server)
+echo "Checking resource usage..."
+kubectl top pods || echo "Metrics server not available yet."
+
+# 4. Load testing using wrk (Simulate 12 threads, 400 connections, for 30s)
+# Ensure you have the service IP or use port-forwarding for the test.
+# Here we assume localhost via port-forward for the test purpose:
+echo "Starting load test..."
+# Start a background port-forward to test connectivity
+kubectl port-forward svc/messaging-app-service 8080:80 &
+PID=$!
+sleep 5
+
+# Run wrk (ensure wrk is installed: sudo apt install wrk)
+wrk -t12 -c400 -d30s http://localhost:8080
+
+# Kill the port-forward process
+kill $PID
