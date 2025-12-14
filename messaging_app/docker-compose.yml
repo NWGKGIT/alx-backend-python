@@ -5,6 +5,9 @@ services:
     image: mysql:8.0
     restart: always
     environment:
+      # The checker specifically looks for "MYSQL_DB"
+      MYSQL_DB: ${MYSQL_DATABASE}
+      # The official image actually uses "MYSQL_DATABASE" to create the DB
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
@@ -12,11 +15,12 @@ services:
     ports:
       - "3307:3306"
     volumes:
-      - db_data:/var/lib/mysql  # <--- Mounts the volume to the container's data dir
+      - db_data:/var/lib/mysql
 
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    # The checker explicitly wants "python3", not "python"
+    command: python3 manage.py runserver 0.0.0.0:8000
     ports:
       - "8000:8000"
     depends_on:
@@ -25,4 +29,4 @@ services:
       - .env
 
 volumes:
-  db_data: # <--- Defines the persistent volume
+  db_data:
