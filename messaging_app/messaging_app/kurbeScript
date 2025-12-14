@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Start Minikube (driver=docker is usually best for Linux)
+minikube start --driver=docker
+
+# Verify the cluster is running
+kubectl cluster-info
+
+# Retrieve available pods (including system pods to show it's working)
+kubectl get pods -A
