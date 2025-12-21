@@ -3,19 +3,16 @@ from environ import Env
 import os
 
 CURRENT_FILE_DIR = Path(__file__).resolve().parent
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = CURRENT_FILE_DIR.parent.parent
 
-env = Env(DEBUG=(bool, False))
+env = Env(DEBUG=(bool, True))
 env.read_env(str(BASE_DIR / ".env"))
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+
 DEBUG = env("DEBUG")
 SECRET_KEY = env("SECRET_KEY")
 
-# SECURITY WARNING: don't run with debug turned on in production!
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", "0.0.0.0", "localhost"]
 
 
 # Application definition
@@ -33,7 +30,8 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_nested",
     "django_filters",
-    "djangorestframework-simplejwt",
+    "rest_framework_simplejwt",
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -140,13 +138,19 @@ REST_FRAMEWORK = {
     # CHECKER REQUIREMENT: Explicitly state PageNumberPagination string here
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
+
+
+CORS_ALLOW_ALL_ORIGINS = True  # change it when prod
 
 from datetime import timedelta
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "USER_ID_FIELD": "user_id",
+    "USER_ID_CLAIM": "user_id",
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
 }
-
-CORS_ALLOW_ALL_ORIGINS = True  # change it when prod

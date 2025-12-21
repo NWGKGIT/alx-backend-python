@@ -17,10 +17,6 @@ class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='guest')
-
-    # Note: 'password' is inherited from AbstractUser, satisfying the check
-    
-    # Use email as the unique identifier
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
@@ -55,6 +51,3 @@ class Message(models.Model):
 
     def __str__(self):
         return f"Message from {self.sender.email} at {self.sent_at}"
-
-
-

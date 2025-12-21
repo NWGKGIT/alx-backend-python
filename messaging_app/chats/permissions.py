@@ -1,29 +1,31 @@
-# chats/permissions.py
+# messaging_app/chats/permissions.py
 
 from rest_framework import permissions
+from .models import Conversation, Message
 
 class IsParticipantOfConversation(permissions.BasePermission):
     """
-    Custom permission to only allow participants of a conversation 
-    to view, send, update, or delete messages.
+    Custom permission to only allow participants of a conversation to access it.
     """
 
+    def has_permission(self, request, view):
+        # We allow general access to the view endpoints because 
+        # get_queryset() in the ViewSets already filters data 
+        # to only show what the user is allowed to see.
+        return request.user and request.user.is_authenticated
+
     def has_object_permission(self, request, view, obj):
-        # CHECKER REQUIREMENT: Explicitly check user.is_authenticated
-        if not request.user.is_authenticated:
-            return False
-
-        # CHECKER REQUIREMENT: Explicitly mention PUT, PATCH, DELETE strings
-        if request.method in ['PUT', 'PATCH', 'DELETE']:
-            # Extra logic to ensure safe methods vs unsafe methods logic
-            pass 
-
-        # If the object is a Conversation, check if user is in participants
-        if hasattr(obj, 'participants'):
+        """
+        Check if the user is a participant of the conversation.
+        This handles both Conversation objects and Message objects.
+        """
+        # If the object is a Conversation, check participants directly
+        if isinstance(obj, Conversation):
             return request.user in obj.participants.all()
         
-        # If the object is a Message, check if user is a participant of the conversation
-        if hasattr(obj, 'conversation'):
+        # If the object is a Message, check the participants of the linked conversation
+        elif isinstance(obj, Message):
             return request.user in obj.conversation.participants.all()
-            
+        
+        # Default strict fallback
         return False

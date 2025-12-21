@@ -4,7 +4,26 @@ from rest_framework import serializers
 from .models import CustomUser, Conversation, Message
 from rest_framework.exceptions import ValidationError
 
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
 
+    class Meta:
+        model = CustomUser
+        fields = ('user_id', 'email', 'username', 'first_name', 'last_name', 'role', 'phone_number', 'password')
+
+    def create(self, validated_data):
+        # We use create_user so the password is automatically hashed
+        user = CustomUser.objects.create_user(
+            email=validated_data['email'],
+            username=validated_data['username'],
+            password=validated_data['password'],
+            first_name=validated_data.get('first_name', ''),
+            last_name=validated_data.get('last_name', ''),
+            role=validated_data.get('role', 'guest'),
+            phone_number=validated_data.get('phone_number', '')
+        )
+        return user
+    
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
@@ -70,23 +89,21 @@ class ConversationSerializer(serializers.ModelSerializer):
         return f"Conversation between {', '.join(names)}"
 
     def validate_participant_ids(self, value):
-        if len(value) < 2:
+        if len(value) < 1:
             raise ValidationError("A conversation must have at least two participants.")
         if len(value) != len(set(value)):
             raise ValidationError("Participants cannot be duplicated in a conversation.")        
         return value
 
-    def validate(self, data):
-        request = self.context.get("request")
-
-        if request and request.user.is_authenticated:
-            creator = request.user
-            participants = data.get("participants", [])
-
-            if creator not in participants:
-                raise ValidationError(
-                    {
-                        "participant_ids": "The user initiating the conversation must be included in the participants list."
-                    }
-                )
-        return data
+    def create(self, validated_data):
+            # Determine participants
+            participants = validated_data.pop('participants', [])
+            current_user = self.context['request'].user
+            
+            # Ensure creator is in participants
+            if current_user not in participants:
+                participants.append(current_user)
+                
+            conversation = Conversation.objects.create(**validated_data)
+            conversation.participants.set(participants)
+            return conversation
