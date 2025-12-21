@@ -1,5 +1,6 @@
 import datetime
 import time
+from django.core.cache import cache
 from django.http import HttpResponseForbidden
 import logging
 
@@ -29,11 +30,8 @@ class RestrictAccessByTimeMiddleware:
             return self.get_response(request)
 
         current_hour = datetime.datetime.now().hour
-        # Logic: Deny access if OUTSIDE 9PM (21) and 6PM (18).
-        # This implies access is only allowed between 9PM and 6PM?
-        # Or standard business hours? ALX tasks usually mean "Restrict to 9AM-6PM".
-        # We will check if hour is outside business hours (9 to 18).
-        if current_hour < 9 or current_hour >= 18:
+        # Business hours defined as 9:00 AM to 5:59 PM (18:00)
+        if not (9 <= current_hour < 18):
             return HttpResponseForbidden("Access restricted outside business hours.")
 
         return self.get_response(request)
@@ -42,40 +40,42 @@ class RestrictAccessByTimeMiddleware:
 class OffensiveLanguageMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
-        self.ip_log = {}
 
     def __call__(self, request):
-        if request.method == "POST":
-            ip = request.META.get("REMOTE_ADDR")
-            current_time = time.time()
+        if request.method == 'POST':
+            # Handle proxy IPs (e.g., Nginx/Heroku)
+            x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+            ip = x_forwarded_for.split(',')[0] if x_forwarded_for else request.META.get('REMOTE_ADDR')
+            
+            cache_key = f"ratelimit_{ip}"
+            request_count = cache.get(cache_key, 0)
 
-            if ip not in self.ip_log:
-                self.ip_log[ip] = []
-
-            # Filter timestamps to last 60 seconds
-            self.ip_log[ip] = [t for t in self.ip_log[ip] if current_time - t < 60]
-
-            if len(self.ip_log[ip]) >= 5:
-                return HttpResponseForbidden("Message limit exceeded.")
-
-            self.ip_log[ip].append(current_time)
+            if request_count >= 5:
+                return HttpResponseForbidden("Rate limit exceeded. Try again in a minute.")
+            
+            # Increment and set expiry to 60 seconds
+            cache.set(cache_key, request_count + 1, 60)
 
         return self.get_response(request)
 
-
-class RolepermissionMiddleware:
+class RolePermissionMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        if request.path.startswith("/admin") or request.path.startswith("/api/"):
+        # Exclude public or administrative paths
+        if request.path.startswith(("/admin", "/login", "/api/public")):
             return self.get_response(request)
 
-        if request.user.is_authenticated:
-            role = getattr(request.user, "role", "guest")
-            if role not in ["admin", "moderator"]:
-                return HttpResponseForbidden(
-                    "Access Denied: Admin or Moderator role required."
-                )
+        # 1. Check if user is even logged in
+        if not request.user.is_authenticated:
+            return HttpResponseForbidden("Authentication required.")
+
+        # 2. Check for specific roles
+        role = getattr(request.user, "role", "guest")
+        if role not in ["admin", "moderator"]:
+            return HttpResponseForbidden(
+                "Access Denied: Admin or Moderator role required."
+            )
 
         return self.get_response(request)
